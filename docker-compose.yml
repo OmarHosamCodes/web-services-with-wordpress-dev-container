@@ -1,48 +1,40 @@
 version: "3.8"
-
 services:
+  
   app:
     build:
       context: .
       dockerfile: Dockerfile
+    restart: always
     ports:
       - "3000:3000"
       - "5173:5173"
       - "5174:5174"
-    expose:
-      - "3000"
-      - "5173"
-      - "5174"
-    command: /bin/sh -c "while sleep 1000; do :; done"
-    
+      - "8082:80"
+    volumes:
+      - data:/var/www/html
+      - ../:/workspace
+    depends_on:
+      - wordpress
+
+ 
     networks:
       - app_net
-  
+
   wordpress:
     image: wordpress:6.6
     restart: always
-    ports:
-      - "8082:80"  # WordPress on port 8080
+       
     environment:
       WORDPRESS_DB_HOST: db
       WORDPRESS_DB_USER: omar
       WORDPRESS_DB_PASSWORD: 123
       WORDPRESS_DB_NAME: WPDB
-    volumes:
-      - wordpress_data:/var/www/html
-      - ../quadrillion-wp-plugin:/var/www/html/wp-content/plugins/quadrillion-wp-plugin
-      - ../quadrillion-wp-plugin:/workspace/quadrillion-wp-plugin
-      - ../web:/workspace/web
-      - ../api:/workspace/api
-      - ../embed:/workspace/embed
-
-    depends_on:
-      - db
-      - app
-      
+ 
     networks:
       - app_net
-
+    depends_on:
+      - db
   db:
     image: mysql:8.0
     restart: always
@@ -52,15 +44,14 @@ services:
       MYSQL_PASSWORD: 123
       MYSQL_ROOT_PASSWORD: rootpass
     volumes:
-      - quadrillion_wp_db_data:/var/lib/mysql
+      - db_data:/var/lib/mysql
     networks:
       - app_net
-
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     restart: always
     ports:
-      - "8081:80"  # phpMyAdmin on port 8081
+      - "8081:80"
     environment:
       PMA_HOST: db
       PMA_PORT: 3306
@@ -70,9 +61,8 @@ services:
       - app_net
 
 networks:
-  app_net:  # Shared network for internal communication
+  app_net:
 
 volumes:
-  wordpress_data:
-  quadrillion_wp_db_data:
-  quadrillion_workspace_data:  # If needed
+  db_data:
+  data:

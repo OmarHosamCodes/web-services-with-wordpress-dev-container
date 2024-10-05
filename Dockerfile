@@ -1,11 +1,16 @@
-# Use a Node base image
-FROM node:20-bullseye
+FROM bitnami/minideb:latest
 
-# Install Bun
+# Install additional dependencies
+RUN apt-get update && apt-get install -y \
+    curl \
+    wget \
+    git \
+    unzip \
+    nano \
+    && apt-get clean
+
+# Install bun.js
 RUN curl -fsSL https://bun.sh/install | bash
 
-# Add Bun to PATH
-ENV PATH="/root/.bun/bin:${PATH}"
-
-# Set the working directory
-WORKDIR /workspace
+# sleep infinity
+CMD ["sleep", "infinity"]
